@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Hollow — Expense Tracker</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='25' fill='%236366f1'/%3E%3Ctext x='50' y='72' font-family='Arial' font-weight='900' font-size='65' text-anchor='middle' fill='white'%3EH%3C/text%3E%3C/svg%3E" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -105,7 +106,7 @@
     }
     .light body::after {
       content: ''; position: fixed; inset: 0; z-index: -1;
-      backdrop-filter: blur(80px); -webkit-backdrop-filter: blur(80px);
+      -webkit-backdrop-filter: blur(80px); backdrop-filter: blur(80px);
     }
     body::after {
       content: ''; position: fixed; inset: 0; z-index: -1;
@@ -118,7 +119,7 @@
       100% { background-position: 0% 50% }
     }
 
-    .stat-card { padding: 24px; border-radius: 24px; border: 1px solid var(--border); background: var(--card-bg); transition: all .4s; box-shadow: var(--card-shadow); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); }
+    .stat-card { padding: 24px; border-radius: 24px; border: 1px solid var(--border); background: var(--card-bg); transition: all .4s; box-shadow: var(--card-shadow); -webkit-backdrop-filter: blur(30px); backdrop-filter: blur(30px); }
     .stat-card:hover { border-color: rgba(99, 102, 241, 0.4); transform: translateY(-3px); }
     .stat-card.blue { background: linear-gradient(135deg, #4f46e5, #7c3aed); border-color: transparent; box-shadow: 0 20px 40px rgba(79, 70, 229, 0.3); color: #fff; }
     
@@ -199,7 +200,7 @@
     .light .rep-metric:nth-child(2) { background: #10b981; color: #fff; }
     .light .rep-metric:nth-child(3) { background: #7c3aed; color: #fff; }
     
-    .rep-label { font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: .2em; opacity: .6; margin-bottom: 8px; }
+    .rep-label { font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: .2em; opacity: .6; margin-bottom: 14px; }
     .light .rep-metric .rep-label { color: #fff; opacity: 0.8; }
     .rep-value { font-size: 22px; font-weight: 900; }
     
@@ -462,7 +463,7 @@
       <div class="rep-metric"><div class="rep-label">Transaction Mass</div><div class="rep-value" id="rep-count">0</div></div>
     </div>
     <div class="insight" id="rep-insight">"No transactions recorded yet. Add some entries to generate your intelligence report."</div>
-    <div class="rep-label" style="margin-bottom:14px">Detailed Ledger Entries</div>
+    <div class="rep-label">Detailed Ledger Entries</div>
     <div id="rep-list"></div>
     <div class="report-actions">
       <button class="rep-btn" onclick="window.print()">
