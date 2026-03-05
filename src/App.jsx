@@ -219,7 +219,7 @@ export default function App() {
           .max-w-3xl { max-width: 100% !important; border: none !important; shadow: none !important; }
           .rounded-[42px] { border-radius: 0 !important; }
           * { color: black !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-          .bg-slate-900\/90 { background: white !important; }
+          .bg-slate-900\\/90 { background: white !important; }
           .text-white { color: black !important; }
           .bg-indigo-600, .bg-emerald-500, .bg-purple-600 { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         }

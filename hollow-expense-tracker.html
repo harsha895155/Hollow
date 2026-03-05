@@ -249,6 +249,7 @@
     .rep-btn:hover { transform: scale(1.02); box-shadow: 0 15px 30px rgba(79,70,229,0.4); }
     .rep-btn-outline { padding: 18px 32px; background: transparent; border: 2px solid var(--border); color: var(--text); border-radius: 18px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: .2em; transition: all .2s; }
     .rep-btn-outline:hover { background: var(--border); }
+    .rep-btn.excel { background: #107c10 !important; }
     
     .rep-row { display: flex; justify-content: space-between; align-items: center; padding: 16px; border-radius: 18px; margin-bottom: 10px; transition: all .2s; }
     .light .rep-row { background: #fff; border: 1px solid #e0e7ff; }
@@ -267,7 +268,7 @@
     @media print {
       #sidebar, #header, .add-btn, .del-btn, .report-actions, .close-btn, .no-print, .close-btn-abs { display: none !important; }
       #main, #content { overflow: visible !important; padding: 0 !important; }
-      .overlay { position: static; background: white; padding: 0; backdrop-filter: none; }
+      .overlay { position: static; background: white; padding: 0; -webkit-backdrop-filter: none; backdrop-filter: none; }
       .modal.wide { max-width: 100%; border: none; box-shadow: none; padding: 0; max-height: none; overflow: visible; }
       body, .modal { background: white !important; color: black !important; }
       body::before, body::after { display: none !important; }
@@ -475,7 +476,7 @@
     <div class="rep-label">Detailed Ledger Entries</div>
     <div id="rep-list"></div>
     <div class="report-actions no-print">
-      <button class="rep-btn" onclick="downloadCSV()" style="background:#107c10">
+      <button class="rep-btn excel" onclick="downloadCSV()">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 12 15 15"/></svg>
         Sheet (Excel)
       </button>
