@@ -211,6 +211,18 @@ export default function App() {
           50% { background-position: 100% 50% }
           100% { background-position: 0% 50% }
         }
+        @media print {
+          aside, header, .no-print { display: none !important; }
+          .flex-1 { overflow: visible !important; }
+          .p-7 { padding: 0 !important; }
+          .fixed { position: relative !important; background: white !important; padding: 0 !important; backdrop-filter: none !important; }
+          .max-w-3xl { max-width: 100% !important; border: none !important; shadow: none !important; }
+          .rounded-[42px] { border-radius: 0 !important; }
+          * { color: black !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+          .bg-slate-900\/90 { background: white !important; }
+          .text-white { color: black !important; }
+          .bg-indigo-600, .bg-emerald-500, .bg-purple-600 { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        }
       `}</style>
       
       {/* Dynamic Nebula background for both themes */}
@@ -489,16 +501,24 @@ export default function App() {
                   ))}
             </div>
 
-            <div className="flex gap-4 pt-4 border-t border-indigo-100/50">
+            <div className="flex gap-4 pt-6 border-t border-indigo-100/50 no-print">
               <button 
                 onClick={downloadCSV}
-                className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white py-5 rounded-2xl font-black uppercase tracking-[.3em] text-[10px] flex items-center justify-center gap-3 transition-all hover:scale-[1.02] active:scale-95 shadow-2xl shadow-indigo-500/30"
+                className="flex-1 bg-[#107c10] hover:bg-[#0e6d0e] text-white py-4 rounded-2xl font-black uppercase tracking-[.2em] text-[9px] flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-95 shadow-xl shadow-emerald-500/20"
               >
-                <FileDown size={18}/> Export System Intelligence
+                <div className="p-1 bg-white/20 rounded-md"><FileDown size={14}/></div>
+                Sheet (Excel)
+              </button>
+              <button 
+                onClick={() => window.print()}
+                className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white py-4 rounded-2xl font-black uppercase tracking-[.2em] text-[9px] flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-95 shadow-xl shadow-indigo-500/20"
+              >
+                <div className="p-1 bg-white/20 rounded-md"><Printer size={14}/></div>
+                Report (PDF)
               </button>
               <button 
                 onClick={()=>setReportOpen(false)}
-                className={`px-10 py-5 rounded-2xl font-black uppercase tracking-[.3em] text-[10px] transition-all hover:bg-slate-100 ${dark ? 'bg-slate-800 border-slate-700' : 'bg-white border-2 border-indigo-100 text-indigo-600'}`}
+                className={`px-8 py-4 rounded-2xl font-black uppercase tracking-[.2em] text-[9px] transition-all hover:bg-slate-100 ${dark ? 'bg-slate-800 border-slate-700' : 'bg-white border-2 border-indigo-100 text-indigo-600'}`}
               >
                 Close
               </button>

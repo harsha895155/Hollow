@@ -265,8 +265,16 @@
     #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
     @media print {
-      #sidebar, #header, .add-btn, .del-btn, .report-actions, .close-btn { display: none !important; }
-      #main, #content { overflow: visible !important; }
+      #sidebar, #header, .add-btn, .del-btn, .report-actions, .close-btn, .no-print, .close-btn-abs { display: none !important; }
+      #main, #content { overflow: visible !important; padding: 0 !important; }
+      .overlay { position: static; background: white; padding: 0; backdrop-filter: none; }
+      .modal.wide { max-width: 100%; border: none; box-shadow: none; padding: 0; max-height: none; overflow: visible; }
+      body, .modal { background: white !important; color: black !important; }
+      body::before, body::after { display: none !important; }
+      .rep-metric { background: #f8fafc !important; border: 1px solid #e2e8f0 !important; color: black !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .rep-row { border-bottom: 1px solid #e2e8f0; border-radius: 0; }
+      .rep-amt-pos { background: #10b981 !important; }
+      .rep-amt-neg { background: #4f46e5 !important; }
     }
   </style>
 </head>
@@ -466,10 +474,14 @@
     <div class="insight" id="rep-insight">"No transactions recorded yet. Add some entries to generate your intelligence report."</div>
     <div class="rep-label">Detailed Ledger Entries</div>
     <div id="rep-list"></div>
-    <div class="report-actions">
-      <button class="rep-btn" onclick="downloadCSV()">
+    <div class="report-actions no-print">
+      <button class="rep-btn" onclick="downloadCSV()" style="background:#107c10">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 12 15 15"/></svg>
+        Sheet (Excel)
+      </button>
+      <button class="rep-btn" onclick="window.print()">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-        Export System Intelligence
+        Report (PDF)
       </button>
       <button class="rep-btn-outline" id="close-report2">Close</button>
     </div>
