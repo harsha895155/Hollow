@@ -27,7 +27,8 @@
     button { cursor: pointer; font-family: inherit; transition: all .2s; }
     input, select { font-family: inherit; }
     ::-webkit-scrollbar { display: none; }
-    * { scrollbar-width: none; -ms-overflow-style: none; }
+    * { scrollbar-width: none !important; -ms-overflow-style: none !important; }
+    *::-webkit-scrollbar { display: none !important; }
     svg { display: inline-block; vertical-align: middle; }
 
     /* ── Layout ── */
@@ -466,9 +467,9 @@
     <div class="rep-label">Detailed Ledger Entries</div>
     <div id="rep-list"></div>
     <div class="report-actions">
-      <button class="rep-btn" onclick="window.print()">
+      <button class="rep-btn" onclick="downloadCSV()">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-        Print / Export PDF
+        Export System Intelligence
       </button>
       <button class="rep-btn-outline" id="close-report2">Close</button>
     </div>
@@ -480,8 +481,8 @@
 
 <script>
 // ── State ─────────────────────────────────────────────────────────────────────
-let transactions = [];
-let isDark = true;
+let transactions = JSON.parse(localStorage.getItem('hollow_txs') || '[]');
+let isDark = false;
 let currency = 'INR';
 let sym = '₹';
 
@@ -642,8 +643,22 @@ $('confirm-entry').addEventListener('click', () => {
   });
   $('tx-name').value = ''; $('tx-amount').value = '';
   $('entry-overlay').classList.add('hidden');
+  localStorage.setItem('hollow_txs', JSON.stringify(transactions));
   render(); renderFull(); toast('Record Added');
 });
+
+function downloadCSV() {
+  if (transactions.length === 0) { toast('No data to export'); return; }
+  const headers = 'Date,Name,Category,Type,Amount\n';
+  const data = transactions.map(t => `${t.date},"${t.name}",${t.category},${t.type},${t.amount}`).join('\n');
+  const blob = new Blob([headers + data], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `Hollow_Intelligence_Report_${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();
+  toast('Report Exported');
+}
 
 // ── Report ────────────────────────────────────────────────────────────────────
 function openReport() {
@@ -699,6 +714,7 @@ $('currency-sel').addEventListener('change', e => {
 $('wipe-btn').addEventListener('click', () => {
   if (confirm('Purge ALL data? This cannot be undone.')) {
     transactions = [];
+    localStorage.removeItem('hollow_txs');
     render(); renderFull(); toast('System Purged');
   }
 });

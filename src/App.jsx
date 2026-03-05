@@ -131,7 +131,7 @@ export default function App() {
   const [toast, setToast] = useState({ show: false, msg: '' });
 
   // Settings
-  const [dark, setDark] = useState(true);
+  const [dark, setDark] = useState(false);
   const [compact, setCompact] = useState(false);
   const [currency, setCurrency] = useState('INR');
   const sym = currency === 'INR' ? '₹' : '$';
@@ -144,6 +144,22 @@ export default function App() {
   const showToast = (msg) => {
     setToast({ show: true, msg });
     setTimeout(() => setToast({ show: false, msg: '' }), 2800);
+  };
+
+  const downloadCSV = () => {
+    if (transactions.length === 0) {
+      showToast('No data to export');
+      return;
+    }
+    const headers = 'Date,Name,Category,Type,Amount\n';
+    const csv = transactions.map(t => `${t.date},"${t.name}",${t.category},${t.type},${t.amount}`).join('\n');
+    const blob = new Blob([headers + csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Hollow_Intelligence_Report_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    showToast('Report Exported Successfully');
   };
 
   const metrics = useMemo(() => {
@@ -475,7 +491,7 @@ export default function App() {
 
             <div className="flex gap-4 pt-4 border-t border-indigo-100/50">
               <button 
-                onClick={() => window.print()}
+                onClick={downloadCSV}
                 className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white py-5 rounded-2xl font-black uppercase tracking-[.3em] text-[10px] flex items-center justify-center gap-3 transition-all hover:scale-[1.02] active:scale-95 shadow-2xl shadow-indigo-500/30"
               >
                 <FileDown size={18}/> Export System Intelligence
