@@ -1,0 +1,17 @@
+[
+  {
+    "id": "id_1791106005636_2rtwds53a",
+    "userId": "id_1791103048281_gwwm9uwrj",
+    "name": "food",
+    "amount": 100,
+    "category": "Food",
+    "type": "expense",
+    "date": "2026-10-04",
+    "paymentMethod": "UPI",
+    "notes": "",
+    "receiptUrl": "",
+    "icon": "💸",
+    "createdAt": "2026-10-04T09:26:45.636Z",
+    "updatedAt": "2026-10-04T09:26:45.636Z"
+  }
+]

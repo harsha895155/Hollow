@@ -1,0 +1,178 @@
+[
+  {
+    "id": "id_1791103209616_jsora09lc",
+    "name": "Other Income",
+    "type": "income",
+    "color": "#64748b",
+    "icon": "💵",
+    "userId": "id_1791103048281_gwwm9uwrj",
+    "isCustom": false,
+    "createdAt": "2026-10-04T08:40:09.616Z",
+    "updatedAt": "2026-10-04T08:40:09.616Z"
+  },
+  {
+    "id": "id_1791103209523_mawry3ewq",
+    "name": "Bonus",
+    "type": "income",
+    "color": "#f59e0b",
+    "icon": "🎁",
+    "userId": "id_1791103048281_gwwm9uwrj",
+    "isCustom": false,
+    "createdAt": "2026-10-04T08:40:09.523Z",
+    "updatedAt": "2026-10-04T08:40:09.523Z"
+  },
+  {
+    "id": "id_1791103209472_jz6wczz22",
+    "name": "Investment",
+    "type": "income",
+    "color": "#8b5cf6",
+    "icon": "📈",
+    "userId": "id_1791103048281_gwwm9uwrj",
+    "isCustom": false,
+    "createdAt": "2026-10-04T08:40:09.472Z",
+    "updatedAt": "2026-10-04T08:40:09.472Z"
+  },
+  {
+    "id": "id_1791103209433_lzwxvxq3g",
+    "name": "Freelance",
+    "type": "income",
+    "color": "#3b82f6",
+    "icon": "💻",
+    "userId": "id_1791103048281_gwwm9uwrj",
+    "isCustom": false,
+    "createdAt": "2026-10-04T08:40:09.433Z",
+    "updatedAt": "2026-10-04T08:40:09.433Z"
+  },
+  {
+    "id": "id_1791103209344_fppnztytq",
+    "name": "Salary",
+    "type": "income",
+    "color": "#10b981",
+    "icon": "💼",
+    "userId": "id_1791103048281_gwwm9uwrj",
+    "isCustom": false,
+    "createdAt": "2026-10-04T08:40:09.344Z",
+    "updatedAt": "2026-10-04T08:40:09.344Z"
+  },
+  {
+    "id": "id_1791103209299_fo1xm12r7",
+    "name": "Other",
+    "type": "expense",
+    "color": "#64748b",
+    "icon": "📦",
+    "userId": "id_1791103048281_gwwm9uwrj",
+    "isCustom": false,
+    "createdAt": "2026-10-04T08:40:09.299Z",
+    "updatedAt": "2026-10-04T08:40:09.299Z"
+  },
+  {
+    "id": "id_1791103209250_dw43i9ehx",
+    "name": "Subscriptions",
+    "type": "expense",
+    "color": "#14b8a6",
+    "icon": "🔄",
+    "userId": "id_1791103048281_gwwm9uwrj",
+    "isCustom": false,
+    "createdAt": "2026-10-04T08:40:09.250Z",
+    "updatedAt": "2026-10-04T08:40:09.250Z"
+  },
+  {
+    "id": "id_1791103209180_lpvn0114a",
+    "name": "Rent",
+    "type": "expense",
+    "color": "#a855f7",
+    "icon": "🏠",
+    "userId": "id_1791103048281_gwwm9uwrj",
+    "isCustom": false,
+    "createdAt": "2026-10-04T08:40:09.180Z",
+    "updatedAt": "2026-10-04T08:40:09.180Z"
+  },
+  {
+    "id": "id_1791103209112_lqhxvytc6",
+    "name": "Travel",
+    "type": "expense",
+    "color": "#6366f1",
+    "icon": "✈️",
+    "userId": "id_1791103048281_gwwm9uwrj",
+    "isCustom": false,
+    "createdAt": "2026-10-04T08:40:09.112Z",
+    "updatedAt": "2026-10-04T08:40:09.112Z"
+  },
+  {
+    "id": "id_1791103209078_j91n7avys",
+    "name": "Education",
+    "type": "expense",
+    "color": "#3b82f6",
+    "icon": "📚",
+    "userId": "id_1791103048281_gwwm9uwrj",
+    "isCustom": false,
+    "createdAt": "2026-10-04T08:40:09.078Z",
+    "updatedAt": "2026-10-04T08:40:09.078Z"
+  },
+  {
+    "id": "id_1791103208972_dsbo5dl2m",
+    "name": "Health",
+    "type": "expense",
+    "color": "#10b981",
+    "icon": "🏥",
+    "userId": "id_1791103048281_gwwm9uwrj",
+    "isCustom": false,
+    "createdAt": "2026-10-04T08:40:08.972Z",
+    "updatedAt": "2026-10-04T08:40:08.972Z"
+  },
+  {
+    "id": "id_1791103208861_4k96pyltk",
+    "name": "Entertainment",
+    "type": "expense",
+    "color": "#8b5cf6",
+    "icon": "🎬",
+    "userId": "id_1791103048281_gwwm9uwrj",
+    "isCustom": false,
+    "createdAt": "2026-10-04T08:40:08.861Z",
+    "updatedAt": "2026-10-04T08:40:08.861Z"
+  },
+  {
+    "id": "id_1791103208810_19gahslak",
+    "name": "Bills",
+    "type": "expense",
+    "color": "#ef4444",
+    "icon": "📄",
+    "userId": "id_1791103048281_gwwm9uwrj",
+    "isCustom": false,
+    "createdAt": "2026-10-04T08:40:08.810Z",
+    "updatedAt": "2026-10-04T08:40:08.810Z"
+  },
+  {
+    "id": "id_1791103208780_7r1d5oqj3",
+    "name": "Shopping",
+    "type": "expense",
+    "color": "#ec4899",
+    "icon": "🛍️",
+    "userId": "id_1791103048281_gwwm9uwrj",
+    "isCustom": false,
+    "createdAt": "2026-10-04T08:40:08.780Z",
+    "updatedAt": "2026-10-04T08:40:08.780Z"
+  },
+  {
+    "id": "id_1791103208717_h3dnjslrx",
+    "name": "Transportation",
+    "type": "expense",
+    "color": "#06b6d4",
+    "icon": "🚗",
+    "userId": "id_1791103048281_gwwm9uwrj",
+    "isCustom": false,
+    "createdAt": "2026-10-04T08:40:08.717Z",
+    "updatedAt": "2026-10-04T08:40:08.717Z"
+  },
+  {
+    "id": "id_1791103208641_5obf5k9jp",
+    "name": "Food",
+    "type": "expense",
+    "color": "#f97316",
+    "icon": "🍔",
+    "userId": "id_1791103048281_gwwm9uwrj",
+    "isCustom": false,
+    "createdAt": "2026-10-04T08:40:08.641Z",
+    "updatedAt": "2026-10-04T08:40:08.641Z"
+  }
+]
