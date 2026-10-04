@@ -17,9 +17,40 @@
     <img src="https://img.shields.io/badge/Vite-7.3-646CFF.svg?style=for-the-badge&logo=vite" alt="Vite" />
     <img src="https://img.shields.io/badge/Node.js-Express-green.svg?style=for-the-badge&logo=node.js" alt="Node" />
     <img src="https://img.shields.io/badge/TailwindCSS-3.4-38B2AC.svg?style=for-the-badge&logo=tailwind-css" alt="Tailwind CSS" />
-    <img src="https://img.shields.io/badge/PWA-Ready-orange.svg?style=for-the-badge" alt="PWA" />
+  </div>
+
+  <div style="margin: 28px 0;">
+    <a href="https://harsha895155.github.io/Hollow/" target="_blank">
+      <img src="./assets/hollow-preview.jpg" alt="Hollow Platform Architecture & Workflow Overview" style="width: 100%; max-width: 1000px; border-radius: 16px; box-shadow: 0 20px 40px -15px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);" />
+    </a>
   </div>
 </div>
+
+---
+
+## 🧭 How Hollow Works (Core Workflow)
+
+Hollow streamlines your financial management through 4 interconnected engines:
+
+```
+┌─────────────────────────┐       ┌─────────────────────────┐
+│ 1. Inflow & Outflow     │       │ 2. Budget Health        │
+│ Log expenses & incomes  │ ────> │ Monthly category limits │
+│ with tags & receipts    │       │ Threshold alerts (80%)  │
+└───────────┬─────────────┘       └───────────┬─────────────┘
+            │                                 │
+            ▼                                 ▼
+┌─────────────────────────┐       ┌─────────────────────────┐
+│ 3. Financial Intelligence│       │ 4. Multi-Currency Sync  │
+│ Live allocation charts  │ ────> │ INR, USD, EUR, GBP, JPY │
+│ Printable PDF/CSV rep.  │       │ Offline & Cloud State   │
+└─────────────────────────┘       └─────────────────────────┘
+```
+
+1. **Inflow & Outflow Tracking**: Record every transaction with categories, payment methods (UPI, Card, Net Banking), notes, and receipt image attachments.
+2. **Budget Health Monitoring**: Set monthly spending targets for categories (Food, Bills, Shopping). Visual indicators turn from Indigo to Amber to Red as spending increases.
+3. **Financial Intelligence Reports**: Get instant analytics on net savings, savings velocity, category allocations (donut chart), and cash flow dynamics (bar chart) with one-click PDF and CSV exports.
+4. **Cloud Sync & Multi-Currency Switcher**: Toggle dynamically between currencies (₹ INR, $ USD, € EUR, £ GBP, ¥ JPY) with immediate recalculation and safe zero-state isolation for new sessions.
 
 ---
 
