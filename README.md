@@ -10,12 +10,14 @@
   </p>
   
   <div>
+    <a href="https://harsha895155.github.io/Hollow/" target="_blank">
+      <img src="https://img.shields.io/badge/Live%20Demo-Online-success?style=for-the-badge&logo=github-pages" alt="Live Demo" />
+    </a>
     <img src="https://img.shields.io/badge/React-18.3-blue.svg?style=for-the-badge&logo=react" alt="React" />
     <img src="https://img.shields.io/badge/Vite-7.3-646CFF.svg?style=for-the-badge&logo=vite" alt="Vite" />
     <img src="https://img.shields.io/badge/Node.js-Express-green.svg?style=for-the-badge&logo=node.js" alt="Node" />
     <img src="https://img.shields.io/badge/TailwindCSS-3.4-38B2AC.svg?style=for-the-badge&logo=tailwind-css" alt="Tailwind CSS" />
     <img src="https://img.shields.io/badge/PWA-Ready-orange.svg?style=for-the-badge" alt="PWA" />
-    <img src="https://img.shields.io/badge/Capacitor-Mobile-blue.svg?style=for-the-badge&logo=capacitor" alt="Capacitor" />
   </div>
 </div>
 
