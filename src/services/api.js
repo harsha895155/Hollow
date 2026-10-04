@@ -42,6 +42,29 @@ const LOCAL_CAT_KEY = 'hollow_categories';
 const LOCAL_USER_KEY = 'hollow_current_user';
 const LOCAL_ACCOUNTS_KEY = 'hollow_registered_accounts';
 
+// Active user helper
+function getActiveUser() {
+  try {
+    const saved = localStorage.getItem(LOCAL_USER_KEY);
+    return saved ? JSON.parse(saved) : null;
+  } catch {
+    return null;
+  }
+}
+
+// User-scoped storage keys so registered accounts keep their own separate records
+function getUserTxKey(userId) {
+  const user = getActiveUser();
+  const uid = userId || user?.id || (user?.isGuest ? 'demo_user' : 'default');
+  return `hollow_tx_${uid}`;
+}
+
+function getUserBudgetKey(userId) {
+  const user = getActiveUser();
+  const uid = userId || user?.id || (user?.isGuest ? 'demo_user' : 'default');
+  return `hollow_budgets_${uid}`;
+}
+
 function getLocalAccounts() {
   try {
     const data = localStorage.getItem(LOCAL_ACCOUNTS_KEY);
@@ -271,8 +294,14 @@ export const api = {
         // Fall back to local
       }
 
-      // Local storage fallback
-      const stored = localStorage.getItem(LOCAL_TX_KEY);
+      // Local storage fallback (Scoped per user account)
+      const key = getUserTxKey();
+      let stored = localStorage.getItem(key);
+      const user = getActiveUser();
+      if (!stored && user && !user.isGuest) {
+        stored = localStorage.getItem(LOCAL_TX_KEY);
+        if (stored) localStorage.setItem(key, stored);
+      }
       let list = stored ? JSON.parse(stored) : [];
       if (filters.type && filters.type !== 'all') {
         list = list.filter(t => t.type === filters.type);
@@ -353,28 +382,31 @@ export const api = {
         // Fall back to local
       }
 
-      const stored = localStorage.getItem(LOCAL_TX_KEY);
+      const key = getUserTxKey();
+      const stored = localStorage.getItem(key);
       if (stored) {
         const list = JSON.parse(stored).filter(t => t.id !== id);
-        localStorage.setItem(LOCAL_TX_KEY, JSON.stringify(list));
+        localStorage.setItem(key, JSON.stringify(list));
       }
       return true;
     },
 
     _saveLocal(item) {
-      const stored = localStorage.getItem(LOCAL_TX_KEY);
+      const key = getUserTxKey();
+      const stored = localStorage.getItem(key);
       const list = stored ? JSON.parse(stored) : [];
       list.unshift(item);
-      localStorage.setItem(LOCAL_TX_KEY, JSON.stringify(list));
+      localStorage.setItem(key, JSON.stringify(list));
     },
 
     _updateLocal(id, updates) {
-      const stored = localStorage.getItem(LOCAL_TX_KEY);
+      const key = getUserTxKey();
+      const stored = localStorage.getItem(key);
       const list = stored ? JSON.parse(stored) : [];
       const index = list.findIndex(t => t.id === id);
       if (index !== -1) {
         list[index] = { ...list[index], ...updates, updatedAt: new Date().toISOString() };
-        localStorage.setItem(LOCAL_TX_KEY, JSON.stringify(list));
+        localStorage.setItem(key, JSON.stringify(list));
         return list[index];
       }
       return null;
@@ -458,7 +490,14 @@ export const api = {
         // Fall back to local
       }
 
-      const stored = localStorage.getItem(LOCAL_BUDGET_KEY);
+      // Local storage fallback (Scoped per user account)
+      const key = getUserBudgetKey();
+      let stored = localStorage.getItem(key);
+      const user = getActiveUser();
+      if (!stored && user && !user.isGuest) {
+        stored = localStorage.getItem(LOCAL_BUDGET_KEY);
+        if (stored) localStorage.setItem(key, stored);
+      }
       return stored ? JSON.parse(stored) : [];
     },
 
@@ -483,10 +522,11 @@ export const api = {
         monthlyLimit: Math.abs(parseFloat(budgetData.monthlyLimit)),
         createdAt: new Date().toISOString(),
       };
-      const stored = localStorage.getItem(LOCAL_BUDGET_KEY);
+      const key = getUserBudgetKey();
+      const stored = localStorage.getItem(key);
       const list = stored ? JSON.parse(stored) : [];
       list.push(newBudget);
-      localStorage.setItem(LOCAL_BUDGET_KEY, JSON.stringify(list));
+      localStorage.setItem(key, JSON.stringify(list));
       return newBudget;
     },
 
@@ -505,12 +545,13 @@ export const api = {
         // Fall back to local
       }
 
-      const stored = localStorage.getItem(LOCAL_BUDGET_KEY);
+      const key = getUserBudgetKey();
+      const stored = localStorage.getItem(key);
       const list = stored ? JSON.parse(stored) : [];
       const idx = list.findIndex(b => b.id === id);
       if (idx !== -1) {
         list[idx] = { ...list[idx], ...updates };
-        localStorage.setItem(LOCAL_BUDGET_KEY, JSON.stringify(list));
+        localStorage.setItem(key, JSON.stringify(list));
         return list[idx];
       }
       return null;
@@ -526,10 +567,11 @@ export const api = {
         // Fall back to local
       }
 
-      const stored = localStorage.getItem(LOCAL_BUDGET_KEY);
+      const key = getUserBudgetKey();
+      const stored = localStorage.getItem(key);
       if (stored) {
         const list = JSON.parse(stored).filter(b => b.id !== id);
-        localStorage.setItem(LOCAL_BUDGET_KEY, JSON.stringify(list));
+        localStorage.setItem(key, JSON.stringify(list));
       }
       return true;
     }

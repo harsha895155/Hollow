@@ -7,9 +7,21 @@ const TransactionContext = createContext();
 
 export function TransactionProvider({ children }) {
   const { user } = useAuth();
+
   const [transactions, setTransactions] = useState(() => {
     try {
-      const stored = localStorage.getItem('hollow_transactions');
+      const activeUser = (() => {
+        try {
+          const s = localStorage.getItem('hollow_current_user');
+          return s ? JSON.parse(s) : null;
+        } catch { return null; }
+      })();
+      if (!activeUser) return [];
+      const key = activeUser.isGuest ? 'hollow_tx_demo_user' : `hollow_tx_${activeUser.id}`;
+      let stored = localStorage.getItem(key);
+      if (!stored && !activeUser.isGuest) {
+        stored = localStorage.getItem('hollow_transactions');
+      }
       return stored ? JSON.parse(stored) : [];
     } catch {
       return [];
@@ -33,21 +45,38 @@ export function TransactionProvider({ children }) {
 
   const [budgets, setBudgets] = useState(() => {
     try {
-      const stored = localStorage.getItem('hollow_budgets');
+      const activeUser = (() => {
+        try {
+          const s = localStorage.getItem('hollow_current_user');
+          return s ? JSON.parse(s) : null;
+        } catch { return null; }
+      })();
+      if (!activeUser) return [];
+      const key = activeUser.isGuest ? 'hollow_budgets_demo_user' : `hollow_budgets_${activeUser.id}`;
+      let stored = localStorage.getItem(key);
+      if (!stored && !activeUser.isGuest) {
+        stored = localStorage.getItem('hollow_budgets');
+      }
       return stored ? JSON.parse(stored) : [];
     } catch {
       return [];
     }
   });
 
-  // Sync state changes to localStorage
+  // Sync state changes to user-scoped localStorage
+  // Critical: if !user, we NEVER overwrite stored records
   useEffect(() => {
     try {
-      localStorage.setItem('hollow_transactions', JSON.stringify(transactions));
+      if (!user) return;
+      const key = user.isGuest ? 'hollow_tx_demo_user' : `hollow_tx_${user.id}`;
+      localStorage.setItem(key, JSON.stringify(transactions));
+      if (!user.isGuest) {
+        localStorage.setItem('hollow_transactions', JSON.stringify(transactions));
+      }
     } catch (err) {
       console.debug('Storage sync note:', err);
     }
-  }, [transactions]);
+  }, [transactions, user]);
 
   useEffect(() => {
     try {
@@ -59,23 +88,58 @@ export function TransactionProvider({ children }) {
 
   useEffect(() => {
     try {
-      localStorage.setItem('hollow_budgets', JSON.stringify(budgets));
+      if (!user) return;
+      const key = user.isGuest ? 'hollow_budgets_demo_user' : `hollow_budgets_${user.id}`;
+      localStorage.setItem(key, JSON.stringify(budgets));
+      if (!user.isGuest) {
+        localStorage.setItem('hollow_budgets', JSON.stringify(budgets));
+      }
     } catch (err) {
       console.debug('Storage sync note:', err);
     }
-  }, [budgets]);
+  }, [budgets, user]);
 
   // Sync or reset state per active user session
   useEffect(() => {
     let isMounted = true;
 
     async function syncUserSession() {
-      if (!user || user.isGuest) {
+      if (!user) {
         if (isMounted) {
           setTransactions([]);
           setBudgets([]);
         }
         return;
+      }
+
+      if (user.isGuest) {
+        const guestTx = localStorage.getItem('hollow_tx_demo_user');
+        const guestBg = localStorage.getItem('hollow_budgets_demo_user');
+        if (isMounted) {
+          setTransactions(guestTx ? JSON.parse(guestTx) : []);
+          setBudgets(guestBg ? JSON.parse(guestBg) : []);
+        }
+        return;
+      }
+
+      // Registered User: Load user-scoped local ledger
+      const userTxKey = `hollow_tx_${user.id}`;
+      const userBgKey = `hollow_budgets_${user.id}`;
+      let localTx = localStorage.getItem(userTxKey);
+      let localBg = localStorage.getItem(userBgKey);
+
+      if (!localTx) {
+        localTx = localStorage.getItem('hollow_transactions');
+        if (localTx) localStorage.setItem(userTxKey, localTx);
+      }
+      if (!localBg) {
+        localBg = localStorage.getItem('hollow_budgets');
+        if (localBg) localStorage.setItem(userBgKey, localBg);
+      }
+
+      if (isMounted) {
+        setTransactions(localTx ? JSON.parse(localTx) : []);
+        setBudgets(localBg ? JSON.parse(localBg) : []);
       }
 
       try {
@@ -96,7 +160,7 @@ export function TransactionProvider({ children }) {
           }
         }
       } catch (err) {
-        console.debug('Local persistence active:', err.message);
+        console.debug('Local persistence note:', err.message);
       }
     }
 

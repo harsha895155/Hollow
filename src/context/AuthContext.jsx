@@ -54,6 +54,8 @@ export function AuthProvider({ children }) {
       isGuest: true,
     };
     // Clean any prior stored transactions or budgets so guest always starts fresh at 0
+    localStorage.removeItem('hollow_tx_demo_user');
+    localStorage.removeItem('hollow_budgets_demo_user');
     localStorage.removeItem('hollow_transactions');
     localStorage.removeItem('hollow_budgets');
     localStorage.setItem('hollow_token', 'demo_jwt_token_123');
@@ -63,9 +65,18 @@ export function AuthProvider({ children }) {
   };
 
   const logout = () => {
+    const isGuest = user?.isGuest || user?.id === 'demo_user' || user?.role === 'guest';
     api.auth.logout();
-    localStorage.removeItem('hollow_transactions');
-    localStorage.removeItem('hollow_budgets');
+
+    if (isGuest) {
+      // ONLY clear temporary guest session data
+      localStorage.removeItem('hollow_tx_demo_user');
+      localStorage.removeItem('hollow_budgets_demo_user');
+      localStorage.removeItem('hollow_transactions');
+      localStorage.removeItem('hollow_budgets');
+    }
+    // Registered accounts KEEP their hollow_tx_<userId> and hollow_budgets_<userId> safely preserved in storage!
+
     setUser(null);
     setToken(null);
   };
