@@ -6,13 +6,28 @@ function getAuthHeader() {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
+// Safely parse JSON from fetch response without throwing syntax error if HTML or empty
+async function parseJsonResponse(res) {
+  if (!res) return null;
+  try {
+    const contentType = res.headers.get('content-type') || '';
+    if (!contentType.toLowerCase().includes('application/json')) {
+      return null;
+    }
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
 // Check if online API is reachable
 let isBackendAvailable = null;
 
 async function checkBackend() {
   try {
     const res = await fetch(`${API_BASE}/health`, { signal: AbortSignal.timeout(2000) });
-    isBackendAvailable = res.ok;
+    const data = await parseJsonResponse(res);
+    isBackendAvailable = res.ok && !!data;
     return isBackendAvailable;
   } catch {
     isBackendAvailable = false;
@@ -25,6 +40,24 @@ const LOCAL_TX_KEY = 'hollow_transactions';
 const LOCAL_BUDGET_KEY = 'hollow_budgets';
 const LOCAL_CAT_KEY = 'hollow_categories';
 const LOCAL_USER_KEY = 'hollow_current_user';
+const LOCAL_ACCOUNTS_KEY = 'hollow_registered_accounts';
+
+function getLocalAccounts() {
+  try {
+    const data = localStorage.getItem(LOCAL_ACCOUNTS_KEY);
+    return data ? JSON.parse(data) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveLocalAccounts(accounts) {
+  try {
+    localStorage.setItem(LOCAL_ACCOUNTS_KEY, JSON.stringify(accounts));
+  } catch (err) {
+    console.debug('Failed to save accounts locally:', err);
+  }
+}
 
 export const api = {
   isOnline: async () => {
@@ -34,49 +67,131 @@ export const api = {
   // ── AUTH ──
   auth: {
     async register(name, email, password) {
+      const cleanEmail = (email || '').trim().toLowerCase();
+      const cleanName = (name || '').trim();
+
+      // 1. Try remote API if available
       try {
         const res = await fetch(`${API_BASE}/auth/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, email, password }),
+          body: JSON.stringify({ name: cleanName, email: cleanEmail, password }),
         });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message || 'Registration failed');
-        localStorage.setItem('hollow_token', data.token);
-        localStorage.setItem(LOCAL_USER_KEY, JSON.stringify(data.user));
-        return data;
+        const data = await parseJsonResponse(res);
+        if (data && res.ok && data.token) {
+          localStorage.setItem('hollow_token', data.token);
+          localStorage.setItem(LOCAL_USER_KEY, JSON.stringify(data.user));
+          return data;
+        }
+        if (data && !res.ok) {
+          throw new Error(data.message || 'Registration failed.');
+        }
       } catch (err) {
-        throw new Error(err.message || 'Registration failed. Please verify network connection.');
+        // If the backend gave a specific JSON validation error (e.g. email in use), throw it
+        if (err.message && !err.message.includes('JSON') && !err.message.includes('fetch') && !err.message.includes('network')) {
+          throw err;
+        }
+        // Backend not available (e.g. GitHub Pages static hosting / offline) -> Proceed to local accounts fallback
       }
+
+      // 2. Standalone & Offline Local Account Management
+      const accounts = getLocalAccounts();
+      const existing = accounts.find(a => a.email.toLowerCase() === cleanEmail);
+      if (existing) {
+        throw new Error('An account with this email already exists. Please sign in instead.');
+      }
+
+      const newUser = {
+        id: `usr_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+        name: cleanName,
+        email: cleanEmail,
+        currency: 'INR',
+        role: 'user',
+        createdAt: new Date().toISOString(),
+      };
+
+      accounts.push({ ...newUser, password });
+      saveLocalAccounts(accounts);
+
+      const token = `local_jwt_${Date.now()}`;
+      localStorage.setItem('hollow_token', token);
+      localStorage.setItem(LOCAL_USER_KEY, JSON.stringify(newUser));
+
+      // Reset ledger to fresh state ₹0 for the brand new user
+      localStorage.removeItem(LOCAL_TX_KEY);
+      localStorage.removeItem(LOCAL_BUDGET_KEY);
+
+      return { success: true, token, user: newUser, isOffline: true };
     },
 
     async login(email, password) {
+      const cleanEmail = (email || '').trim().toLowerCase();
+
+      // 1. Try remote API if available
       try {
         const res = await fetch(`${API_BASE}/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password }),
+          body: JSON.stringify({ email: cleanEmail, password }),
         });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message || 'Login failed');
-        localStorage.setItem('hollow_token', data.token);
-        localStorage.setItem(LOCAL_USER_KEY, JSON.stringify(data.user));
-        return data;
-      } catch (err) {
-        // If local user exists and email matches, allow offline session
-        const saved = localStorage.getItem(LOCAL_USER_KEY);
-        if (saved) {
-          try {
-            const user = JSON.parse(saved);
-            if (user.email === email) {
-              return { success: true, user, token: localStorage.getItem('hollow_token') || 'local_token', isOffline: true };
-            }
-          } catch {
-            // Ignore parse error
-          }
+        const data = await parseJsonResponse(res);
+        if (data && res.ok && data.token) {
+          localStorage.setItem('hollow_token', data.token);
+          localStorage.setItem(LOCAL_USER_KEY, JSON.stringify(data.user));
+          return data;
         }
-        throw new Error(err.message || 'Login failed. Please check your credentials.');
+        if (data && !res.ok) {
+          throw new Error(data.message || 'Invalid email or password.');
+        }
+      } catch (err) {
+        // If the backend explicitly returned a bad credentials error, propagate it
+        if (err.message && !err.message.includes('JSON') && !err.message.includes('fetch') && !err.message.includes('network')) {
+          throw err;
+        }
+        // Backend not available or 404 HTML -> Fall through to local accounts check
       }
+
+      // 2. Local Account Verification
+      const accounts = getLocalAccounts();
+      const account = accounts.find(a => a.email.toLowerCase() === cleanEmail);
+      if (account) {
+        if (account.password === password) {
+          const userObj = {
+            id: account.id,
+            name: account.name,
+            email: account.email,
+            currency: account.currency || 'INR',
+            role: account.role || 'user',
+            createdAt: account.createdAt,
+          };
+          const token = `local_jwt_${Date.now()}`;
+          localStorage.setItem('hollow_token', token);
+          localStorage.setItem(LOCAL_USER_KEY, JSON.stringify(userObj));
+          return { success: true, user: userObj, token, isOffline: true };
+        } else {
+          throw new Error('Incorrect password. Please verify your password and try again.');
+        }
+      }
+
+      // Check if user session was already active in LOCAL_USER_KEY
+      const saved = localStorage.getItem(LOCAL_USER_KEY);
+      if (saved) {
+        try {
+          const currentUser = JSON.parse(saved);
+          if (currentUser.email && currentUser.email.toLowerCase() === cleanEmail) {
+            return {
+              success: true,
+              user: currentUser,
+              token: localStorage.getItem('hollow_token') || 'local_token',
+              isOffline: true,
+            };
+          }
+        } catch {
+          // ignore parse error
+        }
+      }
+
+      throw new Error('No account found with this email. Please click "Create an account" below to register.');
     },
 
     async getCurrentUser() {
@@ -84,8 +199,8 @@ export const api = {
         const res = await fetch(`${API_BASE}/auth/me`, {
           headers: { ...getAuthHeader() },
         });
-        if (res.ok) {
-          const data = await res.json();
+        const data = await parseJsonResponse(res);
+        if (data && res.ok && data.user) {
           localStorage.setItem(LOCAL_USER_KEY, JSON.stringify(data.user));
           return data.user;
         }
@@ -103,8 +218,8 @@ export const api = {
           headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
           body: JSON.stringify(updates),
         });
-        if (res.ok) {
-          const data = await res.json();
+        const data = await parseJsonResponse(res);
+        if (data && res.ok && data.user) {
           localStorage.setItem(LOCAL_USER_KEY, JSON.stringify(data.user));
           return data.user;
         }
@@ -115,6 +230,14 @@ export const api = {
       const user = saved ? JSON.parse(saved) : {};
       const updated = { ...user, ...updates };
       localStorage.setItem(LOCAL_USER_KEY, JSON.stringify(updated));
+
+      const accounts = getLocalAccounts();
+      const idx = accounts.findIndex(a => a.id === user.id || a.email === user.email);
+      if (idx !== -1) {
+        accounts[idx] = { ...accounts[idx], ...updates };
+        saveLocalAccounts(accounts);
+      }
+
       return updated;
     },
 
@@ -140,9 +263,9 @@ export const api = {
           : `${API_BASE}/expenses?${queryParams.toString()}`;
 
         const res = await fetch(url, { headers: { ...getAuthHeader() } });
-        if (res.ok) {
-          const data = await res.json();
-          return data.data || [];
+        const data = await parseJsonResponse(res);
+        if (data && res.ok && data.data) {
+          return data.data;
         }
       } catch {
         // Fall back to local
@@ -178,8 +301,8 @@ export const api = {
           headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
           body: JSON.stringify(txData),
         });
-        if (res.ok) {
-          const data = await res.json();
+        const data = await parseJsonResponse(res);
+        if (data && res.ok && data.data) {
           this._saveLocal(data.data);
           return data.data;
         }
@@ -207,8 +330,8 @@ export const api = {
           headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
           body: JSON.stringify(updates),
         });
-        if (res.ok) {
-          const data = await res.json();
+        const data = await parseJsonResponse(res);
+        if (data && res.ok && data.data) {
           this._updateLocal(id, data.data);
           return data.data;
         }
@@ -263,8 +386,8 @@ export const api = {
     async getAll() {
       try {
         const res = await fetch(`${API_BASE}/categories`, { headers: { ...getAuthHeader() } });
-        if (res.ok) {
-          const data = await res.json();
+        const data = await parseJsonResponse(res);
+        if (data && res.ok && data.data) {
           return data.data;
         }
       } catch {
@@ -282,8 +405,8 @@ export const api = {
           headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
           body: JSON.stringify(catData),
         });
-        if (res.ok) {
-          const data = await res.json();
+        const data = await parseJsonResponse(res);
+        if (data && res.ok && data.data) {
           return data.data;
         }
       } catch {
@@ -327,8 +450,8 @@ export const api = {
       try {
         const url = month ? `${API_BASE}/budgets?month=${month}` : `${API_BASE}/budgets`;
         const res = await fetch(url, { headers: { ...getAuthHeader() } });
-        if (res.ok) {
-          const data = await res.json();
+        const data = await parseJsonResponse(res);
+        if (data && res.ok && data.data) {
           return data.data;
         }
       } catch {
@@ -346,8 +469,8 @@ export const api = {
           headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
           body: JSON.stringify(budgetData),
         });
-        if (res.ok) {
-          const data = await res.json();
+        const data = await parseJsonResponse(res);
+        if (data && res.ok && data.data) {
           return data.data;
         }
       } catch {
@@ -374,8 +497,8 @@ export const api = {
           headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
           body: JSON.stringify(updates),
         });
-        if (res.ok) {
-          const data = await res.json();
+        const data = await parseJsonResponse(res);
+        if (data && res.ok && data.data) {
           return data.data;
         }
       } catch {
