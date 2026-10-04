@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useMemo } from 'react';
 import { api } from '../services/api';
 import { useAuth } from './AuthContext';
 import { DEFAULT_EXPENSE_CATEGORIES, DEFAULT_INCOME_CATEGORIES } from '../constants/categories';
@@ -7,6 +7,16 @@ const TransactionContext = createContext();
 
 export function TransactionProvider({ children }) {
   const { user } = useAuth();
+  const currentUid = user ? (user.isGuest ? 'demo_user' : user.id) : null;
+  const isLoadedForUserRef = useRef((() => {
+    try {
+      const s = localStorage.getItem('hollow_current_user');
+      const u = s ? JSON.parse(s) : null;
+      return u ? (u.isGuest ? 'demo_user' : u.id) : null;
+    } catch {
+      return null;
+    }
+  })());
 
   const [transactions, setTransactions] = useState(() => {
     try {
@@ -17,7 +27,8 @@ export function TransactionProvider({ children }) {
         } catch { return null; }
       })();
       if (!activeUser) return [];
-      const key = activeUser.isGuest ? 'hollow_tx_demo_user' : `hollow_tx_${activeUser.id}`;
+      const uid = activeUser.isGuest ? 'demo_user' : activeUser.id;
+      const key = `hollow_tx_${uid}`;
       let stored = localStorage.getItem(key);
       if (!stored && !activeUser.isGuest) {
         stored = localStorage.getItem('hollow_transactions');
@@ -52,7 +63,8 @@ export function TransactionProvider({ children }) {
         } catch { return null; }
       })();
       if (!activeUser) return [];
-      const key = activeUser.isGuest ? 'hollow_budgets_demo_user' : `hollow_budgets_${activeUser.id}`;
+      const uid = activeUser.isGuest ? 'demo_user' : activeUser.id;
+      const key = `hollow_budgets_${uid}`;
       let stored = localStorage.getItem(key);
       if (!stored && !activeUser.isGuest) {
         stored = localStorage.getItem('hollow_budgets');
@@ -64,19 +76,21 @@ export function TransactionProvider({ children }) {
   });
 
   // Sync state changes to user-scoped localStorage
-  // Critical: if !user, we NEVER overwrite stored records
+  // CRITICAL GUARD: Only save when the user is active AND the data in state has finished loading for this user!
   useEffect(() => {
+    if (!currentUid || isLoadedForUserRef.current !== currentUid) {
+      return; // Do NOT write while loading or during login/logout transitions
+    }
     try {
-      if (!user) return;
-      const key = user.isGuest ? 'hollow_tx_demo_user' : `hollow_tx_${user.id}`;
+      const key = `hollow_tx_${currentUid}`;
       localStorage.setItem(key, JSON.stringify(transactions));
-      if (!user.isGuest) {
+      if (currentUid !== 'demo_user') {
         localStorage.setItem('hollow_transactions', JSON.stringify(transactions));
       }
     } catch (err) {
       console.debug('Storage sync note:', err);
     }
-  }, [transactions, user]);
+  }, [transactions, currentUid]);
 
   useEffect(() => {
     try {
@@ -87,17 +101,19 @@ export function TransactionProvider({ children }) {
   }, [categories]);
 
   useEffect(() => {
+    if (!currentUid || isLoadedForUserRef.current !== currentUid) {
+      return; // Do NOT write while loading or during login/logout transitions
+    }
     try {
-      if (!user) return;
-      const key = user.isGuest ? 'hollow_budgets_demo_user' : `hollow_budgets_${user.id}`;
+      const key = `hollow_budgets_${currentUid}`;
       localStorage.setItem(key, JSON.stringify(budgets));
-      if (!user.isGuest) {
+      if (currentUid !== 'demo_user') {
         localStorage.setItem('hollow_budgets', JSON.stringify(budgets));
       }
     } catch (err) {
       console.debug('Storage sync note:', err);
     }
-  }, [budgets, user]);
+  }, [budgets, currentUid]);
 
   // Sync or reset state per active user session
   useEffect(() => {
@@ -105,6 +121,7 @@ export function TransactionProvider({ children }) {
 
     async function syncUserSession() {
       if (!user) {
+        isLoadedForUserRef.current = null;
         if (isMounted) {
           setTransactions([]);
           setBudgets([]);
@@ -112,19 +129,22 @@ export function TransactionProvider({ children }) {
         return;
       }
 
+      const uid = user.isGuest ? 'demo_user' : user.id;
+
       if (user.isGuest) {
         const guestTx = localStorage.getItem('hollow_tx_demo_user');
         const guestBg = localStorage.getItem('hollow_budgets_demo_user');
         if (isMounted) {
           setTransactions(guestTx ? JSON.parse(guestTx) : []);
           setBudgets(guestBg ? JSON.parse(guestBg) : []);
+          isLoadedForUserRef.current = 'demo_user';
         }
         return;
       }
 
       // Registered User: Load user-scoped local ledger
-      const userTxKey = `hollow_tx_${user.id}`;
-      const userBgKey = `hollow_budgets_${user.id}`;
+      const userTxKey = `hollow_tx_${uid}`;
+      const userBgKey = `hollow_budgets_${uid}`;
       let localTx = localStorage.getItem(userTxKey);
       let localBg = localStorage.getItem(userBgKey);
 
@@ -137,9 +157,13 @@ export function TransactionProvider({ children }) {
         if (localBg) localStorage.setItem(userBgKey, localBg);
       }
 
+      const parsedTx = localTx ? JSON.parse(localTx) : [];
+      const parsedBg = localBg ? JSON.parse(localBg) : [];
+
       if (isMounted) {
-        setTransactions(localTx ? JSON.parse(localTx) : []);
-        setBudgets(localBg ? JSON.parse(localBg) : []);
+        setTransactions(parsedTx);
+        setBudgets(parsedBg);
+        isLoadedForUserRef.current = uid;
       }
 
       try {
@@ -157,6 +181,9 @@ export function TransactionProvider({ children }) {
             setTransactions(combined);
             if (remoteCats && remoteCats.length > 0) setCategories(remoteCats);
             setBudgets(remoteBudgets || []);
+            localStorage.setItem(userTxKey, JSON.stringify(combined));
+            localStorage.setItem(userBgKey, JSON.stringify(remoteBudgets || []));
+            isLoadedForUserRef.current = uid;
           }
         }
       } catch (err) {
