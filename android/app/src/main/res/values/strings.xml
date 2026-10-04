@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Hollow Expense Tracker</string>
+    <string name="title_activity_main">Hollow Expense Tracker</string>
+    <string name="package_name">com.hollow.expensetracker</string>
+    <string name="custom_url_scheme">com.hollow.expensetracker</string>
+</resources>
